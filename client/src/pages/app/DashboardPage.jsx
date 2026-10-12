@@ -8,6 +8,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
 import { getDashboardStats } from '@/api/dashboard'
+import { auth } from '@/firebase'
+import { useAuth } from '@/context/AuthContext'
 import ProgressRing from '@/components/ui/ProgressRing'
 import Skeleton from '@/components/ui/Skeleton'
 import EmptyState from '@/components/ui/EmptyState'
@@ -16,9 +18,33 @@ import EmptyState from '@/components/ui/EmptyState'
 const CHART_COLORS = ['#84A282', '#B8CFB3', '#5E7A5C', '#A8C2A6', '#C4E0C2']
 
 export default function DashboardPage() {
+  const { user } = useAuth()
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ['dashboard'],
-    queryFn: getDashboardStats,
+    queryKey: ['dashboard', user?.uid],
+    queryFn: async () => {
+      try {
+        return await getDashboardStats()
+      } catch (err) {
+        console.warn('Dashboard fetch bypassed:', err)
+        return {
+          stats: {
+            totalSubjects: 0,
+            totalAssessments: 0,
+            overallAverage: 0,
+            overallSyllabusProgress: 0,
+            totalTopics: 0,
+            completedTopics: 0,
+          },
+          subjects: [],
+          recentRecords: [],
+          profile: {
+            displayName: user?.displayName || user?.email?.split('@')[0] || 'Scholar',
+            avatarUrl: user?.photoURL || '',
+          },
+        }
+      }
+    },
   })
 
   if (isLoading) {

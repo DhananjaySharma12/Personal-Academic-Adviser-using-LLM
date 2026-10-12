@@ -21,12 +21,15 @@ export default function TopBar({ onMobileMenuOpen }) {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  const handleLogout = () => {
-    logout()
-    navigate('/')
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } finally {
+      navigate('/login')
+    }
   }
 
-  const displayName = profile?.displayName || user?.email?.split('@')[0] || 'Student'
+  const displayName = user?.displayName || user?.email || profile?.displayName || 'User'
   const initials = displayName
     .split(' ')
     .map((n) => n[0])

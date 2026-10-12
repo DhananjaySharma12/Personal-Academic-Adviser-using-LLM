@@ -1,21 +1,29 @@
 /**
- * client.js — base axios instance. Attaches JWT from localStorage automatically.
+ * client.js — base axios instance. Attaches Firebase ID token automatically.
  * Never puts userId in request body — server reads it from the token.
  */
 import axios from 'axios'
+import { auth } from '@/firebase'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000'
+const API_BASE = import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000'
+const normalizedBase = API_BASE.endsWith('/api') ? API_BASE : `${API_BASE}/api`
 
 const apiClient = axios.create({
-  baseURL: `${API_BASE}/api`,
+  baseURL: normalizedBase,
   timeout: 60000, // 60s — AI generation (quiz/study plan) can take 20-40s
 })
 
-// Attach token to every request
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('paa_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+// Attach Firebase ID token to every request
+apiClient.interceptors.request.use(async (config) => {
+  if (auth.currentUser) {
+    try {
+      const token = await auth.currentUser.getIdToken()
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
+    } catch {
+      // Continue request without token
+    }
   }
   return config
 })
