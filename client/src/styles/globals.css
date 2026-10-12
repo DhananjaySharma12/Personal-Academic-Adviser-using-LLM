@@ -1,0 +1,108 @@
+/* ─── Design Tokens — Scholar Sense (Botanical Sage & Blush Palette) ─── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* ── User Palette: #84A282, #B8CFB3, #FEFAF3, #F6E2E9 ─────────────── */
+  --sage:       #84A282;       /* Primary Sage Green */
+  --laurel:     #B8CFB3;       /* Soft Laurel Green */
+  --ivory:      #FEFAF3;       /* Warm Ivory (main bg) */
+  --blush:      #F6E2E9;       /* Pastel Rose Blush */
+
+  /* ── Derived Shades ─────────────────────────────────────────────────── */
+  --sage-dark:  #5E7A5C;       /* Darker sage for headings */
+  --sage-light: #A8C2A6;       /* Lighter sage for subtle elements */
+  --laurel-muted: #9FB89A;     /* Muted laurel */
+
+  /* ── Background layers ────────────────────────────────────────────── */
+  --bg:        #FEFAF3;        /* Main background — Ivory */
+  --surface:   #FFFFFF;        /* Card surface */
+  --raised:    #F5F0E8;        /* Slightly raised surface */
+  --elevated:  #EDE8DE;        /* Elevated elements */
+
+  /* ── Text ────────────────────────────────────────────────────────── */
+  --text-main:      #2D3A2C;   /* Deep forest green-black */
+  --text-secondary: #4A5E49;   /* Dark sage text */
+  --text-muted:     #7A8E79;   /* Muted botanical */
+
+  /* ── Semantic ────────────────────────────────────────────────────── */
+  --success: #84A282;
+  --warning: #C4956A;
+  --danger:  #C0645A;
+
+  /* ── Borders ──────────────────────────────────────────────────────── */
+  --border:        rgba(132, 162, 130, 0.25);
+  --border-strong: rgba(132, 162, 130, 0.45);
+  --border-blush:  rgba(246, 226, 233, 0.60);
+
+  /* ── Shape ───────────────────────────────────────────────────────── */
+  --radius-card:  16px;
+  --radius-input: 12px;
+
+  /* ── Fonts ───────────────────────────────────────────────────────── */
+  --font-sans:    'Inter', system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--ivory);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100dvh;
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(184, 207, 179, 0.35) 0%, transparent 65%),
+    radial-gradient(circle at 90% 15%, rgba(246, 226, 233, 0.25) 0%, transparent 40%),
+    radial-gradient(circle at 10% 80%, rgba(132, 162, 130, 0.12) 0%, transparent 40%);
+  background-attachment: fixed;
+}
+
+:focus-visible {
+  outline: 2px solid var(--sage);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ── Custom Glow Utilities ─────────────────────────────────────────── */
+.glow-sage {
+  box-shadow: 0 0 24px rgba(132, 162, 130, 0.30), 0 4px 16px rgba(132, 162, 130, 0.15);
+}
+
+.glow-blush {
+  box-shadow: 0 0 20px rgba(246, 226, 233, 0.50), 0 4px 12px rgba(246, 226, 233, 0.25);
+}
+
+.glow-subtle {
+  box-shadow: 0 0 14px rgba(184, 207, 179, 0.25), 0 2px 8px rgba(132, 162, 130, 0.10);
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────── */
+::-webkit-scrollbar             { width: 6px; height: 6px; }
+::-webkit-scrollbar-track       { background: #F5F0E8; }
+::-webkit-scrollbar-thumb       { background: rgba(132, 162, 130, 0.40); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(132, 162, 130, 0.65); }
+
+::selection {
+  background: rgba(132, 162, 130, 0.30);
+  color: #2D3A2C;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
