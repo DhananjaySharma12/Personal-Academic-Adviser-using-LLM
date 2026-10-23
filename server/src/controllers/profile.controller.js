@@ -20,6 +20,7 @@ export const updateProfileSchema = z.object({
   careerInterests: z.array(z.string().trim().max(100)).max(20).optional(),
   onboardingComplete: z.boolean().optional(),
   avatarUrl: z.string().max(2000000).optional(), // base64 data URL or external URL
+  phoneNumber: z.string().trim().max(30).optional(),
 })
 
 /** GET /api/profile */

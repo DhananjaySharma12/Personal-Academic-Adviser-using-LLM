@@ -27,6 +27,7 @@ const studentProfileSchema = new mongoose.Schema(
     careerInterests: [{ type: String, trim: true, maxlength: 100 }],
     onboardingComplete: { type: Boolean, default: false },
     avatarUrl: { type: String, trim: true, maxlength: 2000000, default: '' }, // base64 or URL
+    phoneNumber: { type: String, trim: true, maxlength: 30, default: '' },
   },
   { timestamps: true },
 )

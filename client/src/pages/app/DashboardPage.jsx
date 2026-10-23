@@ -13,12 +13,13 @@ import { useAuth } from '@/context/AuthContext'
 import ProgressRing from '@/components/ui/ProgressRing'
 import Skeleton from '@/components/ui/Skeleton'
 import EmptyState from '@/components/ui/EmptyState'
+import { getSafeDisplayName } from '@/utils/phoneUtils'
 
 // Botanical chart colors
 const CHART_COLORS = ['#84A282', '#B8CFB3', '#5E7A5C', '#A8C2A6', '#C4E0C2']
 
 export default function DashboardPage() {
-  const { user } = useAuth()
+  const { user, profile: authProfile } = useAuth()
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard', user?.uid],
@@ -39,7 +40,7 @@ export default function DashboardPage() {
           subjects: [],
           recentRecords: [],
           profile: {
-            displayName: user?.displayName || user?.email?.split('@')[0] || 'Scholar',
+            displayName: getSafeDisplayName(user, null, 'Scholar'),
             avatarUrl: user?.photoURL || '',
           },
         }
@@ -83,8 +84,10 @@ export default function DashboardPage() {
     color: CHART_COLORS[i % CHART_COLORS.length],
   }))
 
-  const displayName = profile?.displayName || 'Scholar'
-  const hasAvatar = !!profile?.avatarUrl
+  const currentProfile = authProfile || profile
+  const displayName = getSafeDisplayName(user, currentProfile, 'Scholar')
+  const hasAvatar = !!currentProfile?.avatarUrl
+  const avatarUrl = currentProfile?.avatarUrl || ''
   const initials = displayName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
 
   return (
@@ -92,7 +95,7 @@ export default function DashboardPage() {
 
       {/* ── Welcome Banner ──────────────────────────────────────────── */}
       <div
-        className="relative overflow-hidden rounded-card p-6 sm:p-8"
+        className="relative overflow-hidden rounded-card p-4 sm:p-6 md:p-8"
         style={{
           background: 'linear-gradient(145deg, #84A282 0%, #6B8F69 60%, #5E7A5C 100%)',
           border: '1px solid rgba(184, 207, 179, 0.40)',
@@ -110,12 +113,12 @@ export default function DashboardPage() {
           style={{ background: 'radial-gradient(circle, rgba(184, 207, 179, 0.25), transparent)' }}
         />
 
-        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
+        <div className="relative flex flex-col gap-4 sm:gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3 sm:gap-4">
             {/* Avatar */}
             <Link to="/app/profile" title="Edit profile">
               <div
-                className="relative h-14 w-14 rounded-xl overflow-hidden flex items-center justify-center text-base font-bold shrink-0 transition-transform hover:scale-105"
+                className="relative h-12 w-12 sm:h-14 sm:w-14 rounded-xl overflow-hidden flex items-center justify-center text-base font-bold shrink-0 transition-transform hover:scale-105"
                 style={{
                   background: hasAvatar ? undefined : 'rgba(254, 250, 243, 0.25)',
                   border: '2px solid rgba(254, 250, 243, 0.50)',
@@ -124,7 +127,7 @@ export default function DashboardPage() {
                 }}
               >
                 {hasAvatar ? (
-                  <img src={profile.avatarUrl} alt="" className="h-full w-full object-cover" />
+                  <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
                   initials
                 )}
@@ -136,21 +139,21 @@ export default function DashboardPage() {
               </div>
             </Link>
 
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full"
                   style={{ background: 'rgba(254, 250, 243, 0.20)' }}
                 >
                   <Sparkles size={11} style={{ color: '#FEFAF3' }} />
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(254,250,243,0.80)' }}>
+                <span className="text-[10px] font-bold uppercase tracking-widest truncate" style={{ color: 'rgba(254,250,243,0.80)' }}>
                   Academic Command Center
                 </span>
               </div>
-              <h1 className="font-display text-2xl font-bold md:text-3xl" style={{ color: '#FEFAF3' }}>
+              <h1 className="font-display text-xl sm:text-2xl font-bold md:text-3xl truncate" style={{ color: '#FEFAF3' }}>
                 Welcome back, {displayName.split(' ')[0]}!
               </h1>
-              <p className="text-xs sm:text-sm" style={{ color: 'rgba(254,250,243,0.75)' }}>
+              <p className="text-xs sm:text-sm line-clamp-2" style={{ color: 'rgba(254,250,243,0.75)' }}>
                 {profile?.course ? (
                   <>
                     {profile.course}
@@ -164,10 +167,10 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0">
             <Link to="/app/profile">
               <button
-                className="flex items-center gap-1.5 rounded-btn px-3 py-2 text-xs font-medium transition-all"
+                className="flex items-center gap-1.5 rounded-btn px-3 py-2 text-xs font-medium min-h-[38px] transition-all"
                 style={{
                   background: 'rgba(254, 250, 243, 0.18)',
                   border: '1px solid rgba(254, 250, 243, 0.35)',
@@ -182,7 +185,7 @@ export default function DashboardPage() {
             </Link>
             <Link to="/app/chat">
               <button
-                className="flex items-center gap-1.5 rounded-btn px-4 py-2 text-xs font-semibold transition-all"
+                className="flex items-center gap-1.5 rounded-btn px-3.5 sm:px-4 py-2 text-xs font-semibold min-h-[38px] transition-all"
                 style={{
                   background: '#FEFAF3',
                   border: '1px solid rgba(254, 250, 243, 0.80)',
@@ -201,7 +204,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── KPI Cards ──────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
         {[
           {
             label: 'Total Subjects',
@@ -242,14 +245,14 @@ export default function DashboardPage() {
         ].map(({ label, value, icon: Icon, sub, color, bg, border }) => (
           <div
             key={label}
-            className="rounded-card p-4 flex items-start gap-3 transition-all hover:shadow-glow"
+            className="rounded-card p-3 sm:p-4 flex items-start gap-2.5 sm:gap-3 transition-all hover:shadow-glow"
             style={{
               background: '#FFFFFF',
               border: `1px solid ${border}`,
               boxShadow: '0 2px 12px rgba(132, 162, 130, 0.08)',
             }}
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl"
               style={{ background: bg }}
             >
               <Icon size={18} style={{ color }} />

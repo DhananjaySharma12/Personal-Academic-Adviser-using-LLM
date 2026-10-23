@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Modal from '@/components/ui/Modal'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
-import { BookOpen, Hash, Award, Check } from 'lucide-react'
+import { BookOpen, Hash, Award, Check, AlertTriangle } from 'lucide-react'
 
 const COLOR_OPTIONS = [
   '#84A282', // Botanical Sage
@@ -15,7 +15,14 @@ const COLOR_OPTIONS = [
   '#7A8E79', // Muted Laurel
 ]
 
-export default function SubjectModal({ isOpen, onClose, onSubmit, editingSubject, isLoading }) {
+export default function SubjectModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  editingSubject,
+  isLoading,
+  existingSubjects = [],
+}) {
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -24,8 +31,10 @@ export default function SubjectModal({ isOpen, onClose, onSubmit, editingSubject
     targetGrade: 'A',
     syllabusInput: '',
   })
+  const [formError, setFormError] = useState('')
 
   useEffect(() => {
+    setFormError('')
     if (editingSubject) {
       setFormData({
         name: editingSubject.name || '',
@@ -47,13 +56,38 @@ export default function SubjectModal({ isOpen, onClose, onSubmit, editingSubject
     }
   }, [editingSubject, isOpen])
 
+  const trimmedName = formData.name.trim()
+  const trimmedCode = formData.code.trim().toUpperCase()
+
+  const duplicateSubject = useMemo(() => {
+    if (!trimmedName) return null
+    return existingSubjects.find((s) => {
+      if (editingSubject && s._id === editingSubject._id) return false
+      const nameMatch = (s.name || '').trim().toLowerCase() === trimmedName.toLowerCase()
+      const codeMatch = (s.code || '').trim().toUpperCase() === trimmedCode
+      return nameMatch && codeMatch
+    })
+  }, [existingSubjects, editingSubject, trimmedName, trimmedCode])
+
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!formData.name.trim()) return
+    setFormError('')
+
+    if (!trimmedName) {
+      setFormError('Subject name is required')
+      return
+    }
+
+    if (duplicateSubject) {
+      setFormError(
+        `A subject with this name${duplicateSubject.code ? ` and code (${duplicateSubject.code})` : ''} already exists.`,
+      )
+      return
+    }
 
     const payload = {
-      name: formData.name.trim(),
-      code: formData.code.trim().toUpperCase(),
+      name: trimmedName,
+      code: trimmedCode,
       credits: Number(formData.credits) || 3,
       color: formData.color,
       targetGrade: formData.targetGrade.trim() || 'A',
@@ -77,24 +111,50 @@ export default function SubjectModal({ isOpen, onClose, onSubmit, editingSubject
       title={editingSubject ? 'Edit Subject' : 'Add New Subject'}
       size="md"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        {/* Form Error Banner */}
+        {formError && (
+          <div className="rounded-xl border border-rose-300 bg-rose-50/90 p-3 text-xs text-rose-800 flex items-start gap-2">
+            <AlertTriangle size={15} className="text-rose-600 shrink-0 mt-0.5" />
+            <span>{formError}</span>
+          </div>
+        )}
+
+        {/* Duplicate Warning */}
+        {duplicateSubject && !formError && (
+          <div className="rounded-xl border border-amber-300 bg-amber-50/90 p-3 text-xs text-amber-900 flex items-start gap-2">
+            <AlertTriangle size={15} className="text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-semibold">Already exists:</span> You already have a course named{' '}
+              <strong>&ldquo;{duplicateSubject.name}&rdquo;</strong>
+              {duplicateSubject.code ? ` (${duplicateSubject.code})` : ''}.
+            </div>
+          </div>
+        )}
+
         <Input
           label="Course / Subject Name"
           placeholder="e.g. Data Structures & Algorithms"
           icon={BookOpen}
           value={formData.name}
-          onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+          onChange={(e) => {
+            setFormData((prev) => ({ ...prev, name: e.target.value }))
+            if (formError) setFormError('')
+          }}
           required
           autoFocus
         />
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
             label="Course Code (Optional)"
             placeholder="e.g. CS201"
             icon={Hash}
             value={formData.code}
-            onChange={(e) => setFormData((prev) => ({ ...prev, code: e.target.value }))}
+            onChange={(e) => {
+              setFormData((prev) => ({ ...prev, code: e.target.value }))
+              if (formError) setFormError('')
+            }}
           />
           <Input
             label="Credits"
@@ -106,7 +166,7 @@ export default function SubjectModal({ isOpen, onClose, onSubmit, editingSubject
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="mb-1.5 block text-xs font-medium text-text-secondary">
               Target Grade
@@ -176,7 +236,12 @@ export default function SubjectModal({ isOpen, onClose, onSubmit, editingSubject
           <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary" loading={isLoading}>
+          <Button
+            type="submit"
+            variant="primary"
+            isLoading={isLoading}
+            disabled={isLoading || Boolean(duplicateSubject)}
+          >
             {editingSubject ? 'Save Changes' : 'Create Subject'}
           </Button>
         </div>

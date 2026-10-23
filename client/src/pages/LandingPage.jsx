@@ -93,10 +93,10 @@ export default function LandingPage() {
           boxShadow: '0 2px 14px rgba(132, 162, 130, 0.08)',
         }}
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2.5">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
+          <Link to="/" className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             <span
-              className="flex h-9 w-9 items-center justify-center rounded-xl"
+              className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl"
               style={{
                 background: 'linear-gradient(135deg, #84A282, #5E7A5C)',
                 border: '1px solid rgba(184, 207, 179, 0.50)',
@@ -104,25 +104,29 @@ export default function LandingPage() {
                 color: '#FEFAF3',
               }}
             >
-              <GraduationCap size={19} />
+              <GraduationCap size={17} />
             </span>
-            <span className="font-display text-base font-bold tracking-tight" style={{ color: '#2D3A2C' }}>
+            {/* Hide text on very narrow screens to prevent overflow */}
+            <span className="hidden xs:block sm:block font-display text-sm sm:text-base font-bold tracking-tight truncate" style={{ color: '#2D3A2C' }}>
               Scholar Sense
             </span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link to="/login">
               <Button variant="ghost" size="sm">Sign in</Button>
             </Link>
-            <Link to="/register">
+            <Link to="/register" className="hidden sm:inline-flex">
               <Button size="sm">Get started free</Button>
+            </Link>
+            <Link to="/register" className="sm:hidden">
+              <Button size="sm">Join free</Button>
             </Link>
           </div>
         </div>
       </nav>
 
       {/* ── Hero ── */}
-      <AuroraBackground className="pt-32 pb-24 px-6">
+      <AuroraBackground className="pt-28 sm:pt-32 pb-20 sm:pb-24 px-4 sm:px-6">
         <div className="mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -198,7 +202,7 @@ export default function LandingPage() {
       </AuroraBackground>
 
       {/* ── Product preview ── */}
-      <section className="px-6 py-16">
+      <section className="px-4 sm:px-6 py-12 sm:py-16">
         <div className="mx-auto max-w-5xl">
           <div className="relative rounded-2xl border border-border bg-surface p-2 shadow-2xl">
             {/* Mock browser chrome */}
@@ -261,19 +265,19 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features ── */}
-      <section className="px-6 py-20">
+      <section className="px-4 sm:px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl">
           <motion.div
             variants={stagger}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: '-80px' }}
-            className="mb-12 text-center"
+            className="mb-10 sm:mb-12 text-center"
           >
-            <motion.h2 variants={fadeUp} className="font-display text-4xl font-bold text-text-main mb-4">
+            <motion.h2 variants={fadeUp} className="font-display text-3xl sm:text-4xl font-bold text-text-main mb-3 sm:mb-4">
               Everything a student needs
             </motion.h2>
-            <motion.p variants={fadeUp} className="text-text-secondary max-w-xl mx-auto">
+            <motion.p variants={fadeUp} className="text-text-secondary max-w-xl mx-auto text-sm sm:text-base">
               Six powerful tools, one unified platform. Built on real data — no lorem ipsum, no fake numbers.
             </motion.p>
           </motion.div>
@@ -283,15 +287,16 @@ export default function LandingPage() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: '-60px' }}
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3"
           >
             {FEATURES.map(({ icon: Icon, title, desc }) => (
               <motion.div key={title} variants={fadeUp}>
-                <Card hover className="h-full flex flex-col gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                {/* p-5 sm:p-6 — 20px on narrow, 24px on wider; icon box is 40px with p-2 inner gap */}
+                <Card hover className="h-full flex flex-col gap-4 p-5 sm:p-6">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                     <Icon size={20} className="text-primary-soft" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="font-semibold text-text-main mb-1">{title}</h3>
                     <p className="text-sm text-text-secondary leading-relaxed">{desc}</p>
                   </div>
@@ -303,7 +308,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── How it works ── */}
-      <section className="px-6 py-20 border-t border-border">
+      <section className="px-4 sm:px-6 py-16 sm:py-20 border-t border-border">
         <div className="mx-auto max-w-5xl">
           <motion.div
             variants={stagger}
@@ -335,9 +340,9 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA Banner ── */}
-      <section className="px-6 py-20">
+      <section className="px-4 sm:px-6 py-16 sm:py-20">
         <div
-          className="mx-auto max-w-3xl rounded-2xl p-10 md:p-14 text-center relative overflow-hidden"
+          className="mx-auto max-w-3xl rounded-2xl p-6 sm:p-10 md:p-14 text-center relative overflow-hidden"
           style={{
             background: 'linear-gradient(135deg, rgba(132, 162, 130, 0.15) 0%, rgba(246, 226, 233, 0.40) 50%, rgba(184, 207, 179, 0.20) 100%)',
             border: '1px solid rgba(132, 162, 130, 0.35)',
@@ -362,7 +367,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-border px-6 py-8">
+      <footer className="border-t border-border px-4 sm:px-6 py-6 sm:py-8">
         <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <GraduationCap size={18} className="text-primary-soft" />

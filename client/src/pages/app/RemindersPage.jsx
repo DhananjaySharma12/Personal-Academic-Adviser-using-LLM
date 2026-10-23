@@ -359,12 +359,12 @@ export default function RemindersPage() {
       {/* ── Add Reminder Modal ── */}
       <AnimatePresence>
         {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/40 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg rounded-2xl p-6 md:p-8 space-y-6"
+              className="w-full max-w-lg rounded-2xl p-5 sm:p-6 md:p-8 space-y-5 max-h-[92vh] overflow-y-auto"
               style={{ background: '#FFFFFF', border: '1px solid rgba(132,162,130,0.30)', boxShadow: '0 8px 40px rgba(132,162,130,0.20)' }}
             >
               <div className="flex items-center justify-between">

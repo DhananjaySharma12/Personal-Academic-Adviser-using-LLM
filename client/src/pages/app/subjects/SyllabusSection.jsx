@@ -49,8 +49,9 @@ export default function SyllabusSection({ subject, onToggleTopic, onAddTopic, on
               <button
                 type="button"
                 onClick={() => onDeleteTopic(subject, idx)}
-                className="opacity-0 group-hover:opacity-100 text-text-muted hover:text-rose-400 p-1 rounded transition-all shrink-0"
+                className="opacity-70 sm:opacity-0 sm:group-hover:opacity-100 text-text-muted hover:text-rose-400 p-1.5 rounded transition-all shrink-0"
                 title="Remove topic"
+                aria-label="Remove topic"
               >
                 <Trash2 size={13} />
               </button>

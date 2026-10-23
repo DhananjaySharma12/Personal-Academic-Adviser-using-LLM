@@ -6,8 +6,9 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Menu, User, LogOut, ChevronDown, GraduationCap, Bell, ShieldCheck } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
+import { getSafeDisplayName, getSafeUserIdentifier } from '@/utils/phoneUtils'
 
-export default function TopBar({ onMobileMenuOpen }) {
+export default function TopBar({ onMobileMenuOpen, mobileMenuOpen, menuButtonRef }) {
   const { user, profile, logout } = useAuth()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -24,12 +25,18 @@ export default function TopBar({ onMobileMenuOpen }) {
   const handleLogout = async () => {
     try {
       await logout()
-    } finally {
-      navigate('/login')
+      // Do NOT call navigate('/login') here.
+      // After signOut(), Firebase fires onAuthStateChanged which sets user=null.
+      // ProtectedRoute then renders <Navigate to="/login" replace />.
+      // Manually navigating here causes a race: PublicOnlyRoute still sees
+      // the old user token and redirects back to /app/dashboard (blank flash).
+    } catch {
+      // signOut failure is extremely rare — force redirect as fallback
+      navigate('/login', { replace: true })
     }
   }
 
-  const displayName = user?.displayName || user?.email || profile?.displayName || 'User'
+  const displayName = getSafeDisplayName(user, profile, 'User')
   const initials = displayName
     .split(' ')
     .map((n) => n[0])
@@ -49,14 +56,17 @@ export default function TopBar({ onMobileMenuOpen }) {
       }}
     >
       {/* Left: mobile menu + logo */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <button
+          ref={menuButtonRef}
           onClick={onMobileMenuOpen}
-          className="md:hidden rounded-lg p-2 transition-colors hover:bg-sage/10"
+          className="md:hidden flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl transition-colors hover:bg-sage/10 active:bg-sage/20 focus:outline-none focus:ring-2 focus:ring-sage/40"
           style={{ color: '#4A5E49' }}
-          aria-label="Open menu"
+          aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={Boolean(mobileMenuOpen)}
+          aria-controls="mobile-navigation-drawer"
         >
-          <Menu size={20} />
+          <Menu size={22} />
         </button>
         <Link to="/app/dashboard" className="md:hidden flex items-center gap-2">
           <GraduationCap size={20} style={{ color: '#84A282' }} />
@@ -157,7 +167,7 @@ export default function TopBar({ onMobileMenuOpen }) {
                         {displayName}
                       </p>
                       <p className="text-[11px] truncate" style={{ color: '#7A8E79' }}>
-                        {user?.email || '—'}
+                        {getSafeUserIdentifier(user, profile) || '—'}
                       </p>
                     </div>
                   </div>

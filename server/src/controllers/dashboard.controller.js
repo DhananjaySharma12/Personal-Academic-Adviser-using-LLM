@@ -102,6 +102,7 @@ export async function getDashboardStats(req, res, next) {
         semester: profile?.semester || null,
         institution: profile?.institution || '',
         avatarUrl: profile?.avatarUrl || '',
+        phoneNumber: profile?.phoneNumber || '',
       },
       stats: {
         totalSubjects: subjects.length,

@@ -17,6 +17,7 @@ import Button from '@/components/ui/Button'
 import EmptyState from '@/components/ui/EmptyState'
 import Skeleton from '@/components/ui/Skeleton'
 import { useToast } from '@/components/ui/Toast'
+import { useAuth } from '@/context/AuthContext'
 
 // Modular subcomponents
 import SubjectCard from './subjects/SubjectCard'
@@ -26,6 +27,7 @@ import RecordModal from './subjects/RecordModal'
 export default function SubjectsPage() {
   const queryClient = useQueryClient()
   const { addToast } = useToast()
+  const { user } = useAuth()
 
   // Navigation & filter state
   const [search, setSearch] = useState('')
@@ -40,20 +42,30 @@ export default function SubjectsPage() {
 
   // ── Queries ─────────────────────────────────────────────────────────────
   const { data: subjects = [], isLoading: isLoadingSubjects } = useQuery({
-    queryKey: ['subjects'],
+    queryKey: ['subjects', user?.uid],
     queryFn: getSubjects,
+    enabled: !!user,
   })
 
   const { data: records = [], isLoading: isLoadingRecords } = useQuery({
-    queryKey: ['records'],
+    queryKey: ['records', user?.uid],
     queryFn: () => getRecords(),
+    enabled: !!user,
   })
 
   // ── Mutations ───────────────────────────────────────────────────────────
   const subjectMutation = useMutation({
     mutationFn: (payload) =>
       editingSubject ? updateSubject(editingSubject._id, payload) : createSubject(payload),
-    onSuccess: () => {
+    onSuccess: (savedSubject) => {
+      if (savedSubject) {
+        const updater = (old = []) =>
+          editingSubject
+            ? old.map((s) => (s._id === editingSubject._id ? savedSubject : s))
+            : [savedSubject, ...old.filter((s) => s._id !== savedSubject._id)]
+        queryClient.setQueryData(['subjects', user?.uid], updater)
+        queryClient.setQueryData(['subjects'], updater)
+      }
       queryClient.invalidateQueries({ queryKey: ['subjects'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       setIsSubjectModalOpen(false)
@@ -64,20 +76,23 @@ export default function SubjectsPage() {
       )
     },
     onError: (err) => {
-      addToast(err.message || 'Failed to save subject', 'error')
+      addToast(err?.response?.data?.error?.message || err?.message || 'Failed to save subject', 'error')
     },
   })
 
   const deleteSubjectMutation = useMutation({
     mutationFn: deleteSubject,
-    onSuccess: () => {
+    onSuccess: (_, deletedId) => {
+      const filterOut = (old = []) => old.filter((s) => s._id !== deletedId)
+      queryClient.setQueryData(['subjects', user?.uid], filterOut)
+      queryClient.setQueryData(['subjects'], filterOut)
       queryClient.invalidateQueries({ queryKey: ['subjects'] })
       queryClient.invalidateQueries({ queryKey: ['records'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       addToast('Subject and related assessments removed', 'success')
     },
     onError: (err) => {
-      addToast(err.message || 'Failed to delete subject', 'error')
+      addToast(err?.response?.data?.error?.message || err.message || 'Failed to delete subject', 'error')
     },
   })
 
@@ -227,12 +242,12 @@ export default function SubjectsPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
           <Button
             variant="secondary"
             onClick={() => handleOpenRecordModal()}
             disabled={subjects.length === 0}
-            className="flex items-center gap-2 text-xs"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 text-xs min-h-[38px]"
           >
             <Plus size={15} />
             <span>Add Assessment</span>
@@ -240,7 +255,7 @@ export default function SubjectsPage() {
           <Button
             variant="primary"
             onClick={() => handleOpenSubjectModal()}
-            className="flex items-center gap-2 text-xs"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 text-xs min-h-[38px]"
           >
             <Plus size={15} />
             <span>Add Course</span>
@@ -250,27 +265,27 @@ export default function SubjectsPage() {
 
       {/* ── Overview Stat Strip ─────────────────────────────────────────── */}
       {subjects.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="card p-3.5 bg-surface/70 border-border flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary-soft">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 sm:grid-cols-4">
+          <div className="card p-3 sm:p-3.5 bg-surface/70 border-border flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary-soft">
               <BookOpen size={18} />
             </div>
             <div className="min-w-0">
               <p className="text-[11px] text-text-muted font-medium truncate">Enrolled Courses</p>
-              <h4 className="font-display text-lg font-bold text-text-main">
+              <h4 className="font-display text-base sm:text-lg font-bold text-text-main truncate">
                 {stats.totalSubjects}{' '}
                 <span className="text-xs font-normal text-text-muted">({stats.totalCredits} cr)</span>
               </h4>
             </div>
           </div>
 
-          <div className="card p-3.5 bg-surface/70 border-border flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400">
+          <div className="card p-3 sm:p-3.5 bg-surface/70 border-border flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400">
               <Layers size={18} />
             </div>
             <div className="min-w-0">
               <p className="text-[11px] text-text-muted font-medium truncate">Syllabus Covered</p>
-              <h4 className="font-display text-lg font-bold text-text-main">
+              <h4 className="font-display text-base sm:text-lg font-bold text-text-main truncate">
                 {stats.syllabusPct}%{' '}
                 <span className="text-xs font-normal text-text-muted">
                   ({stats.completedTopics}/{stats.totalTopics})
@@ -279,25 +294,25 @@ export default function SubjectsPage() {
             </div>
           </div>
 
-          <div className="card p-3.5 bg-surface/70 border-border flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-400">
+          <div className="card p-3 sm:p-3.5 bg-surface/70 border-border flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-400">
               <Award size={18} />
             </div>
             <div className="min-w-0">
               <p className="text-[11px] text-text-muted font-medium truncate">Avg. Marks</p>
-              <h4 className="font-display text-lg font-bold text-text-main">
+              <h4 className="font-display text-base sm:text-lg font-bold text-text-main truncate">
                 {stats.overallAvg !== null ? `${stats.overallAvg}%` : '—'}
               </h4>
             </div>
           </div>
 
-          <div className="card p-3.5 bg-surface/70 border-border flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15 text-indigo-400">
+          <div className="card p-3 sm:p-3.5 bg-surface/70 border-border flex items-center gap-2.5 sm:gap-3">
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15 text-indigo-400">
               <FileCheck size={18} />
             </div>
             <div className="min-w-0">
               <p className="text-[11px] text-text-muted font-medium truncate">Assessments</p>
-              <h4 className="font-display text-lg font-bold text-text-main">{records.length} logged</h4>
+              <h4 className="font-display text-base sm:text-lg font-bold text-text-main truncate">{records.length} logged</h4>
             </div>
           </div>
         </div>
@@ -387,7 +402,7 @@ export default function SubjectsPage() {
         </div>
       ) : filteredSubjects.length === 0 ? (
         <div className="card text-center py-10 text-xs text-text-muted">
-          No courses found matching "{search}".
+          No courses found matching &ldquo;{search}&rdquo;.
         </div>
       ) : (
         <div className="space-y-3.5">
@@ -419,6 +434,7 @@ export default function SubjectsPage() {
         onSubmit={(payload) => subjectMutation.mutate(payload)}
         editingSubject={editingSubject}
         isLoading={subjectMutation.isPending}
+        existingSubjects={subjects}
       />
 
       <RecordModal

@@ -25,10 +25,20 @@ export function ToastProvider({ children }) {
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), duration)
   }, [])
 
+  /**
+   * Positional-args alias used throughout the app:
+   *   addToast('Message text', 'success' | 'error' | 'warning')
+   * Maps to the object-based `toast({ type, message })` API above.
+   */
+  const addToast = useCallback(
+    (message, type = 'success', duration = 4000) => toast({ type, message, duration }),
+    [toast],
+  )
+
   const dismiss = (id) => setToasts((prev) => prev.filter((t) => t.id !== id))
 
   return (
-    <ToastContext.Provider value={{ toast }}>
+    <ToastContext.Provider value={{ toast, addToast }}>
       {children}
       <div
         className="fixed bottom-6 right-6 z-50 flex flex-col gap-2"
@@ -66,5 +76,6 @@ export function ToastProvider({ children }) {
 export function useToast() {
   const ctx = useContext(ToastContext)
   if (!ctx) throw new Error('useToast must be used inside ToastProvider')
+  // ctx exposes both { toast } (object API) and { addToast } (positional API)
   return ctx
 }

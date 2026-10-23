@@ -23,18 +23,20 @@ export default function Button({
   variant = 'primary',
   size = 'md',
   isLoading = false,
+  loading = false,
   icon: Icon,
   className = '',
   ...props
 }) {
+  const isBusy = Boolean(isLoading || loading)
   return (
     <motion.button
       whileTap={{ scale: 0.97 }}
       className={`inline-flex items-center justify-center gap-2 ${variants[variant]} ${sizes[size]} ${className}`}
-      disabled={isLoading || props.disabled}
+      disabled={isBusy || props.disabled}
       {...props}
     >
-      {isLoading ? (
+      {isBusy ? (
         <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
       ) : Icon ? (
         <Icon size={16} />

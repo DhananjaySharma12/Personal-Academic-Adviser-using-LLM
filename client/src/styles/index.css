@@ -1,4 +1,4 @@
-@import './globals.css';
+﻿@import './globals.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -255,16 +255,47 @@
     animation: shimmer 1.6s infinite;
   }
 
-  /* ── Dividers ─────────────────────────────────────────────────────── */
+  /* -- Dividers -- */
   .divider {
     border-top: 1px solid rgba(132, 162, 130, 0.20);
     margin: 1rem 0;
   }
 
-  /* ── Avatar ring ─────────────────────────────────────────────────── */
+  /* -- Avatar ring -- */
   .avatar-ring {
     ring: 2px;
     ring-color: rgba(132, 162, 130, 0.50);
     ring-offset: 2px;
+  }
+
+  /* -- Auth cross-link (Create account, Sign in) -----------------------
+   * Uses blue-600 (#2563EB) for good contrast on ivory/white surfaces.
+   * All interactive states here so inline style= not needed in JSX.
+   * ------------------------------------------------------------------- */
+  .auth-link {
+    color: #2563EB;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+    text-underline-offset: 3px;
+  }
+  .auth-link:hover {
+    color: #1D4ED8;
+    text-decoration: underline;
+    text-decoration-color: rgba(37, 99, 235, 0.50);
+  }
+  .auth-link:focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+    border-radius: 4px;
+    color: #1D4ED8;
+  }
+  .auth-link:active {
+    color: #1E3A8A;
+  }
+  .auth-link[aria-disabled="true"] {
+    color: #93C5FD;
+    cursor: default;
+    pointer-events: none;
   }
 }

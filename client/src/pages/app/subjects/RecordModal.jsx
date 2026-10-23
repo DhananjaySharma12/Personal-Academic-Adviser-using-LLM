@@ -100,7 +100,7 @@ export default function RecordModal({
           autoFocus
         />
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="mb-1.5 block text-xs font-medium text-text-secondary">
               Assessment Type
@@ -127,7 +127,7 @@ export default function RecordModal({
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 xs:grid-cols-3 sm:grid-cols-3 gap-3">
           <Input
             label="Marks Scored"
             type="number"

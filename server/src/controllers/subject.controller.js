@@ -6,7 +6,7 @@ import { z } from 'zod'
 import Subject from '../models/Subject.js'
 import AcademicRecord from '../models/AcademicRecord.js'
 import { ok, created } from '../utils/response.js'
-import { notFound } from '../utils/ApiError.js'
+import { notFound, conflict } from '../utils/ApiError.js'
 
 // ── Zod schemas ──────────────────────────────────────────────────────────────
 export const createSubjectSchema = z.object({
@@ -42,6 +42,11 @@ export const updateSubjectSchema = z.object({
     .optional(),
 })
 
+// Helper to escape regex special characters
+function escapeRegex(text) {
+  return (text || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 // ── Controllers ──────────────────────────────────────────────────────────────
 
 /** GET /api/subjects */
@@ -68,8 +73,25 @@ export async function getSubjectById(req, res, next) {
 /** POST /api/subjects */
 export async function createSubject(req, res, next) {
   try {
+    const trimmedName = (req.body.name || '').trim()
+    const trimmedCode = (req.body.code || '').trim()
+
+    // Duplicate check for this user (case-insensitive name and code)
+    const existing = await Subject.findOne({
+      userId: req.user.id,
+      name: { $regex: new RegExp(`^${escapeRegex(trimmedName)}$`, 'i') },
+      code: { $regex: new RegExp(`^${escapeRegex(trimmedCode)}$`, 'i') },
+    })
+    if (existing) {
+      throw conflict(
+        `A subject with the name "${trimmedName}"${trimmedCode ? ` and code "${trimmedCode}"` : ''} already exists.`,
+      )
+    }
+
     const subject = await Subject.create({
       ...req.body,
+      name: trimmedName,
+      code: trimmedCode.toUpperCase(),
       userId: req.user.id,
     })
     created(res, subject)
@@ -81,12 +103,32 @@ export async function createSubject(req, res, next) {
 /** PATCH /api/subjects/:id */
 export async function updateSubject(req, res, next) {
   try {
+    const current = await Subject.findOne({ _id: req.params.id, userId: req.user.id })
+    if (!current) throw notFound('Subject not found')
+
+    const targetName = req.body.name !== undefined ? req.body.name.trim() : current.name
+    const targetCode = req.body.code !== undefined ? req.body.code.trim().toUpperCase() : current.code
+
+    // Duplicate check if renaming or changing code
+    if (req.body.name !== undefined || req.body.code !== undefined) {
+      const duplicate = await Subject.findOne({
+        _id: { $ne: req.params.id },
+        userId: req.user.id,
+        name: { $regex: new RegExp(`^${escapeRegex(targetName)}$`, 'i') },
+        code: { $regex: new RegExp(`^${escapeRegex(targetCode)}$`, 'i') },
+      })
+      if (duplicate) {
+        throw conflict(
+          `Another subject with the name "${targetName}"${targetCode ? ` and code "${targetCode}"` : ''} already exists.`,
+        )
+      }
+    }
+
     const subject = await Subject.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
-      { $set: req.body },
+      { $set: { ...req.body, name: targetName, code: targetCode } },
       { new: true, runValidators: true },
     )
-    if (!subject) throw notFound('Subject not found')
     ok(res, subject)
   } catch (err) {
     next(err)

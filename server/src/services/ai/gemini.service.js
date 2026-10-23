@@ -144,7 +144,7 @@ AI Answer: ${aiResponse.substring(0, 200)}`
       const model = client.getGenerativeModel({ model: modelName })
       const res = await model.generateContent(prompt)
       const text = (await res.response).text().trim()
-      const title = text.replace(/[\"']/g, '').slice(0, 60)
+      const title = text.replace(/["']/g, '').slice(0, 60)
       if (title) return title
     } catch (err) {
       console.warn(`[Gemini title fallback] Model ${modelName} failed: ${err.message}`)

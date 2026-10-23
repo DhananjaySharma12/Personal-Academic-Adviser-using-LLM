@@ -38,7 +38,7 @@ export default function Modal({ isOpen, open, onClose, title, children, size = '
     <AnimatePresence>
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-title"
@@ -60,17 +60,17 @@ export default function Modal({ isOpen, open, onClose, title, children, size = '
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`relative w-full ${sizeClasses[size]} bg-surface border border-border rounded-card shadow-2xl`}
+            className={`relative w-full ${sizeClasses[size]} max-h-[92vh] flex flex-col bg-surface border border-border rounded-card shadow-2xl`}
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-border px-6 py-4">
-              <h2 id="modal-title" className="font-display text-lg font-semibold text-text-main">
+            <div className="flex items-center justify-between border-b border-border px-4 sm:px-6 py-3.5 sm:py-4 shrink-0">
+              <h2 id="modal-title" className="font-display text-base sm:text-lg font-semibold text-text-main truncate">
                 {title}
               </h2>
               <button
                 ref={closeRef}
                 onClick={onClose}
-                className="rounded-md p-1 text-text-muted hover:text-text-main hover:bg-raised transition-colors"
+                className="rounded-lg h-9 w-9 flex items-center justify-center text-text-muted hover:text-text-main hover:bg-raised transition-colors shrink-0 ml-2 focus:outline-none focus:ring-2 focus:ring-primary/40"
                 aria-label="Close dialog"
               >
                 <X size={18} />
@@ -78,7 +78,7 @@ export default function Modal({ isOpen, open, onClose, title, children, size = '
             </div>
 
             {/* Body */}
-            <div className="px-6 py-5">{children}</div>
+            <div className="px-4 sm:px-6 py-4 sm:py-5 overflow-y-auto flex-1">{children}</div>
           </motion.div>
         </div>
       )}

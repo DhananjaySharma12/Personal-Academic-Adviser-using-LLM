@@ -879,7 +879,7 @@ export default function CareerPage() {
                     <option value="Entry-Level / Graduate">Entry-Level / Graduate</option>
                     <option value="Internship">Summer / Fall Internship</option>
                     <option value="Junior Specialist">Junior Specialist (1-2 Years)</option>
-                    <option value="Research / Higher Studies">Research / Higher Studies (Master's / PhD)</option>
+                    <option value="Research / Higher Studies">Research / Higher Studies (Master&apos;s / PhD)</option>
                   </select>
                 </div>
 
